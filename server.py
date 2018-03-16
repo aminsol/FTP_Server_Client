@@ -1,30 +1,36 @@
 #!/usr/bin/python3
-#This is server.py file
+# This is server.py file
 import socket
 
-#Theportonwhichtolisten
-serverPort = 12000
+# The ports on which to listen
 
-#CreateaTCPsocket
+# For file transfer
+FTP = 3333
+# For communicating to server
+serverPort = 2222
+# For communicating to Client
+clientPort = 1111
+
+# Create a TCP socket
 serverSocket= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#Bindthesockettotheport
+# Bind the socket to the port
 serverSocket.bind(('',serverPort))
 
-#Startlisteningforincomingconnections
-serverSocket.listen(12000)
+# Start listening for incoming connections
+serverSocket.listen(serverPort)
 
 print("The server is ready to receive")
 
-#Thebuffertostoretherreceiveddata
+# The buffer to storetherreceived data
 data=""
 
-#Foreveracceptincomingconnections
+# Forever accept incoming connections
 while True:
-    #Acceptaconnection;getclient’ssocket
+    # Accept a connection; get client’s socket
     connectionSocket,addr=serverSocket.accept()
-    #Receivewhateverthenewlyconnectedclienthastosend
+    # Receive whatever the newly connected client has to send
     data = connectionSocket.recv(40)
     print(data)
 
-    #Closethesocket
+    # Close the socket
     connectionSocket.close()

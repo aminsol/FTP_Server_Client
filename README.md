@@ -6,13 +6,16 @@ FTP server and FTP client. The client shall connect to the server and support up
 * __upload ( `<filename>` )__ _client and server_
     * Returns `ok` for success
     * Returns `<error message>` for failure (such as file doesn't exist)
+    
 * __download ( `<filename>` )__ _client and server_
     * Returns `ok` for success
     * Returns `<error message>` for failure
+    
 * __ls__ _server only_
     * Returns string for success
     * Returns False for failure
     * List of files in the current directory
+    
 * __main__
     * user inputs
     * main communication

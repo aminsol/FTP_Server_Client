@@ -1,13 +1,28 @@
 # FTP Server Client
 FTP server and FTP client. The client shall connect to the server and support uploading and downloading of files to/from server. Before
 
+# Functions
+* upload(<filename>)
+    * Returns ok for success
+    * Returns <error message> for failure (such as file doesn't exist)
+* download(<filename>)
+    * Returns ok for success
+    * Returns <error message> for failure
+* ls
+    * Returns string
+    * List of files in the current directory
+* main
+    * user inputs
+    * main communication
+        
+    
+
 # Client 
 
 ### Commands:
     ls
 	upload <File Name>
 	download <File Name>
-	cancel (cencelling file transfer)
 
 ### Responses:
     ok (message received with no error)
@@ -21,7 +36,6 @@ FTP server and FTP client. The client shall connect to the server and support up
 ### Commands:
 	upload <File Name>
 	download <File Name>
-	cancel (cencelling file transfer)
 	
 ### Responses:
     ok (message received with no error)

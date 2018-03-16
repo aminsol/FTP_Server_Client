@@ -2,10 +2,10 @@
 FTP server and FTP client. The client shall connect to the server and support uploading and downloading of files to/from server. Before
 
 # Functions
-* upload(`<filename>`)
+* upload ( `<filename>` )
     * Returns ok for success
     * Returns <error message> for failure (such as file doesn't exist)
-* download(`<filename>`)
+* download ( `<filename>` )
     * Returns ok for success
     * Returns <error message> for failure
 * ls
@@ -34,10 +34,6 @@ FTP server and FTP client. The client shall connect to the server and support up
 * File Transfer Port: 3333
 
 ## Server
-
-### Commands:
-	upload <File Name>
-	download <File Name>
 	
 ### Responses:
     ok (message received with no error)

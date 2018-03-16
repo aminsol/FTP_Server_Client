@@ -11,7 +11,7 @@ serverSocket= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serverSocket.bind(('',serverPort))
 
 #Startlisteningforincomingconnections
-serverSocket.listen(1)
+serverSocket.listen(12000)
 
 print("The server is ready to receive")
 

@@ -8,13 +8,13 @@ clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # get local machine name
 host = socket.gethostname()
 
-port = 12000
+port = 3413
 
 # connection to hostname on the port.
 clientSocket.connect((host, port))
 
 # Our message
-data = "Hello world"
+data = b"Hello world"
 
 # Sending the message
 clientSocket.send(data)

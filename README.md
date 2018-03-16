@@ -2,14 +2,15 @@
 FTP server and FTP client. The client shall connect to the server and support uploading and downloading of files to/from server. Before
 
 # Functions
-* upload(<filename>)
+* upload(`<filename>`)
     * Returns ok for success
     * Returns <error message> for failure (such as file doesn't exist)
-* download(<filename>)
+* download(`<filename>`)
     * Returns ok for success
     * Returns <error message> for failure
 * ls
-    * Returns string
+    * Returns string for success
+    * Returns False for failure
     * List of files in the current directory
 * main
     * user inputs

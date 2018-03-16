@@ -34,7 +34,7 @@ FTP server and FTP client. The client shall connect to the server and support up
 * File Transfer Port: 3333
 
 ## Server
-	
+
 ### Responses:
     ok (message received with no error)
 	err <message>

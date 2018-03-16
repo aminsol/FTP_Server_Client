@@ -3,10 +3,10 @@ FTP server and FTP client. The client shall connect to the server and support up
 
 # Functions
 * upload ( `<filename>` )
-    * Returns ok for success
+    * Returns `ok` for success
     * Returns `<error message>` for failure (such as file doesn't exist)
 * download ( `<filename>` )
-    * Returns ok for success
+    * Returns `ok` for success
     * Returns `<error message>` for failure
 * ls
     * Returns string for success

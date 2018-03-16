@@ -1,6 +1,7 @@
 # FTP Server Client
 FTP server and FTP client. The client shall connect to the server and support uploading and downloading of files to/from server.
-
+# Language
+ * Python 3.4
 # Functions
 * upload ( `<filename>` )
     * Returns `ok` for success

@@ -9,7 +9,7 @@ FTP server and FTP client. The client shall connect to the server and support up
 	ls
 	ok (message received with no error)
 	err
-#####Port: 1111
+##### Port: 1111
 
 ## Server commands:
 	reject(file does not exist)

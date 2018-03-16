@@ -19,16 +19,18 @@ FTP server and FTP client. The client shall connect to the server and support up
     
 # Protocol Design
 
+## Ports
+    
+* Client Port: 1111
+* Server Port: 2222
+* File Transfer Port: 3333
+
 ## Client 
 
 ### Commands:
     ls
 	upload <File Name>
 	download <File Name>
-
-### Responses:
-    ok (message received with no error)
-	err <message>
 	
 * Ports: 1111
 * File Transfer Port: 3333
@@ -36,9 +38,16 @@ FTP server and FTP client. The client shall connect to the server and support up
 ## Server
 
 ### Responses:
+
+	(ls) <list of directories>
     ok (message received with no error)
 	err <message>
-	(ls) <list of directories>
 * Ports: 2222
 * File Transfer Port: 3333
+
+# Team
+ * Amin Soltani
+ * Elias Perez
+ * Fernando
+ * Karla
 

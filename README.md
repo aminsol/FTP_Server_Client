@@ -17,8 +17,9 @@ FTP server and FTP client. The client shall connect to the server and support up
     * main communication
         
     
+# Protocol Design
 
-# Client 
+## Client 
 
 ### Commands:
     ls
@@ -32,7 +33,7 @@ FTP server and FTP client. The client shall connect to the server and support up
 * Ports: 1111
 * File Transfer Port: 3333
 
-# Server
+## Server
 
 ### Commands:
 	upload <File Name>

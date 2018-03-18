@@ -17,12 +17,11 @@ host = socket.gethostname()
 
 # connection to hostname on the port.
 clientSocket.connect((host, serverPort))
+command = input("Enter your commnad: ")
 
-# Our message
-data = b"Hello world"
 
 # Sending the message
-clientSocket.send(data)
+clientSocket.send(command.encode('ascii'))
 
 clientSocket.close()
 print("Client connection Closed!")

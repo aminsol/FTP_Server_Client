@@ -31,6 +31,18 @@ while True:
     # Receive whatever the newly connected client has to send
     data = connectionSocket.recv(40)
     print(data)
+    
+    
+#edit but this should list the dirctories    
+    import os
+def files(path):  
+    for file in os.listdir(path):
+        #os.path.isfile() returns True if the given entry is a file.
+        if os.path.isfile(os.path.join(path, file)):
+            yield file
+
+for file in files("."):  
+    print (file)
 
     # Close the socket
     connectionSocket.close()

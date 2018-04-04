@@ -19,7 +19,7 @@ host = "127.0.0.1"
 
 # port numbers of server
 server = 2222
-ftp= 3333
+ftp = 3333
 
 def getSize(filename):
     st = os.stat('/Users/eliasperez/Documents/GitHub/FTP_Server_Client/Server/'+filename)
@@ -53,7 +53,7 @@ def RetrFile():
             totalRecv = totalRecv + len(filedata)
             filehandler.write(filedata)
             print("Total Recieved: %d " % totalRecv)
-        print("Do i get here?")
+    
     
         
         # close the file

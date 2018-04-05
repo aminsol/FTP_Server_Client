@@ -7,7 +7,7 @@ import re
 # The ports on which to listen
 
 # For file transfer
-FTP = 3333
+ftp = 3333
 # For communicating to server
 serverPort = 2222
 # For communicating to Client

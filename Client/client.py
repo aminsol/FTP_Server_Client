@@ -26,7 +26,7 @@ def send(data):
     # Receiving the response
     respond = client_socket.recv(128)
     client_socket.close()
-    return respond
+    return respond.decode('ascii')
 
 
 def getsize(filename):
@@ -45,10 +45,6 @@ def upload(filename):
     return filename
 
 
-def ls():
-    return send("ls".encode('ascii'))
-
-
 uploadFile = re.compile('upload ([\w\.]+)')
 downloadFile = re.compile('download ([\w\.]+)')
 
@@ -56,7 +52,7 @@ downloadFile = re.compile('download ([\w\.]+)')
 command = input("Enter your command: ")
 result = ""
 if command == "ls":
-    result = ls()
+    result = send("ls")
 elif downloadFile.match(command):
     fileName = downloadFile.match(command)[1]
     # Asking server to send us a file
@@ -68,6 +64,8 @@ elif uploadFile.match(command):
     fileName = uploadFile.match(command)[1]
     fileSize = getsize(fileName)
     if fileSize:
-        send("upload " + fileName + " " + str(fileSize))
-        result = upload(fileName)
+        if send("upload " + fileName + " " + str(fileSize)) == "ok":
+            result = upload(fileName)
+
+print(result)
 print("Client connection Closed!")

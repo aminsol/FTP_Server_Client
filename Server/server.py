@@ -64,6 +64,7 @@ while True:
     elif uploadfile.match(data):
         fileName = uploadfile.match(data)[1]
         fileSize = int(uploadfile.match(data)[2])
+        connectionSocket.send("ok".encode('ascii'))
         download(fileName, fileSize)
     else:
         connectionSocket.send("err".encode('ascii'))

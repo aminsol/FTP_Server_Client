@@ -2,6 +2,7 @@
 # This is client.py file
 import socket
 import os
+import sys
 import re
 
 # For file transfer
@@ -10,6 +11,7 @@ ftp = 3333
 serverPort = 2222
 # For communicating to Client
 clientPort = 1111
+host = socket.gethostname()
 
 
 def send(data):
@@ -17,7 +19,6 @@ def send(data):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # get local machine name
-    host = socket.gethostname()
 
     # connection to hostname on the port.
     client_socket.connect((host, serverPort))
@@ -80,8 +81,27 @@ def download(filename, filesize):
     return clientSocket_transf.close()
 
 
-def upload(filename):
-    return filename
+def upload(uInput):  # pass communication socket hostname and file name
+    try:
+        fObj = open(uInput, "rb")
+        fileSize = getSize(uInput)
+        clientCtrSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        clientCtrSocket.connect((host, ftp))
+        print("FTP connection established commncing upload")
+        bytesSent = 0
+        while bytesSent < int(fileSize):
+            fileData = fObj.read()
+            if fileData:
+                bytesSent += clientCtrSocket.send(fileData)
+            print("Sent: " + str(bytesSent) + " / " + str(fileSize).decode())
+        print("File upload done...\n")
+        fObj.close()
+    except FileNotFoundError:
+        print("File not found...")
+        return "err"
+    except ConnectionError:
+        print("Error connecting to FTP port \n")
+        return "err"
 
 
 uploadFile = re.compile('upload ([\w\.]+)')

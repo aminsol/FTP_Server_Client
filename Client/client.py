@@ -43,18 +43,25 @@ def RetrFile():
         
         # creat a file named "filename" and ready to write binary data to the file
         filehandler = open(filename, 'wb')
+        
+        # use filesize to get entire file
         filesize = getSize(filename)
-        totalRecv = len(filedata)        # write the data to the file
+        
+        # store amount of data being recieved
+        totalRecv = len(filedata)
+        
+        # write the data to the file
         filehandler.write(filedata)
+        
         print("file size: %d " % filesize)
         print("Total Recieved: %d " % totalRecv)
+        
+        # loop to read in entire file
         while totalRecv < filesize:
             filedata = clientSocket_transf.recv(1024)
             totalRecv = totalRecv + len(filedata)
             filehandler.write(filedata)
             print("Total Recieved: %d " % totalRecv)
-    
-    
         
         # close the file
         filehandler.close()

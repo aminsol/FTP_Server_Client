@@ -35,13 +35,13 @@ while True:
     
 #this should list the dirctories    
     import os
-def files(path):  
+def ls(path):  
     for file in os.listdir(path):
         #os.path.isfile() returns True if the given entry is a file.
         if os.path.isfile(os.path.join(path, file)):
             yield file
 
-for file in files("."):  
+for file in ls("."):  
     print (file)
 
     # Close the socket

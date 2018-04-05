@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # This is server.py file
 import socket
+import os
 import re
 
 # The ports on which to listen
@@ -13,8 +14,14 @@ serverPort = 2222
 clientPort = 1111
 
 
+def getsize(filename):
+    if os.path.isfile(filename):
+        size = os.stat(filename).st_size
+    else:
+        size = False
+    return size
 
-def download(filename):
+def download(filename, filesize):
     return filename
 
 def upload(filename):
@@ -36,8 +43,8 @@ host = socket.gethostname()
 serverSocket.listen(serverPort)
 
 print("The server is ready to receive")
-uploadfile = re.compile('upload (\w+\.\w+)')
-downloadfile = re.compile('download (\w+\.\w+)')
+uploadfile = re.compile('upload ([\w\.]+) (\d+)')
+downloadfile = re.compile('download ([\w\.]+)')
 # The buffer to storetherreceived data
 data = ""
 response = ""
@@ -46,15 +53,20 @@ while True:
     # Accept a connection; get client’s socket
     connectionSocket,addr = serverSocket.accept()
     # Receive whatever the newly connected client has to send
-    data = connectionSocket.recv(40).decode('ascii')
+    data = connectionSocket.recv(128).decode('ascii')
     if data == "ls":
-        print(ls())
+        connectionSocket.send(ls().encode('ascii'))
     elif downloadfile.match(data):
-        print(download(downloadfile.match(data)[1]))
+        fileName = downloadfile.match(data)[1]
+        fileSize = str(getsize(fileName))
+        connectionSocket.send(fileSize.encode('ascii'))
+        upload(fileName)
     elif uploadfile.match(data):
-        print(upload(uploadfile.match(data)[1]))
+        fileName = uploadfile.match(data)[1]
+        fileSize = int(uploadfile.match(data)[2])
+        download(fileName, fileSize)
     else:
+        connectionSocket.send("err".encode('ascii'))
         print("err")
-
-    # Close the socket
-    connectionSocket.close()
+# Close the socket
+connectionSocket.close()

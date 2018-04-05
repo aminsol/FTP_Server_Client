@@ -33,7 +33,7 @@ while True:
     print(data)
     
     
-#edit but this should list the dirctories    
+#this should list the dirctories    
     import os
 def files(path):  
     for file in os.listdir(path):

@@ -91,7 +91,7 @@ def ls(path):
     if os.path.isdir(path):
         return "\n".join(os.listdir(path))
     else:
-        return False
+        return "Not such directory exist!"
 
 # Create a TCP socket
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -107,6 +107,7 @@ serverSocket.listen(serverPort)
 print("The server is ready to receive")
 uploadfile = re.compile('upload ([\w\.]+) (\d+)')
 downloadfile = re.compile('download ([\w\.]+)')
+lscommand = re.compile('ls ?([\w\.\\\/]*)')
 # The buffer to storetherreceived data
 data = ""
 response = ""
@@ -116,8 +117,12 @@ while True:
     connectionSocket,addr = serverSocket.accept()
     # Receive whatever the newly connected client has to send
     data = connectionSocket.recv(128).decode('ascii')
-    if data == "ls":
-        connectionSocket.send(ls().encode('ascii'))
+    if lscommand.match(data):
+        if lscommand.match(data)[1]:
+            result = ls(lscommand.match(data)[1]).encode('ascii')
+            connectionSocket.send(ls(lscommand.match(data)[1]).encode('ascii'))
+        else:
+            connectionSocket.send(ls(".").encode('ascii'))
     elif downloadfile.match(data):
         fileName = downloadfile.match(data)[1]
         fileSize = str(getsize(fileName))

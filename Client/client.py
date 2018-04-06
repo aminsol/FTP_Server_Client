@@ -93,7 +93,7 @@ def upload(uInput):  # pass communication socket hostname and file name
             fileData = fObj.read()
             if fileData:
                 bytesSent += clientCtrSocket.send(fileData)
-            print("Sent: " + str(bytesSent) + " / " + str(fileSize).decode())
+            print("Sent: " + str(bytesSent) + " / " + str(fileSize))
         print("File upload done...\n")
         fObj.close()
     except FileNotFoundError:
@@ -106,13 +106,14 @@ def upload(uInput):  # pass communication socket hostname and file name
 
 uploadFile = re.compile('upload ([\w\.]+)')
 downloadFile = re.compile('download ([\w\.]+)')
+lscommand = re.compile('ls ?([\w\.\\\/]*)')
 command = ""
 
 while command != "exit":
     command = input("Enter your command: ")
     result = ""
-    if command == "ls":
-        result = send("ls")
+    if lscommand.match(command):
+        print(send(command))
     elif downloadFile.match(command):
         fileName = downloadFile.match(command)[1]
         # Asking server to send us a file

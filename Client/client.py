@@ -111,32 +111,33 @@ command = ""
 
 while command != "exit":
     command = input("Enter your command: ")
-    result = ""
-    if lscommand.match(command):
-        print(send(command))
-    elif downloadFile.match(command):
-        fileName = downloadFile.match(command)[1]
-        # Asking server to send us a file
-        # if the file exist then server response with file size
-        size = send("download " + fileName)
-        if size != "err":
-            print("Start downloading..")
-            result = download(fileName, size)
-            print("Download is finished!")
+    if command != "exit":
+        result = ""
+        if lscommand.match(command):
+            print(send(command))
+        elif downloadFile.match(command):
+            fileName = downloadFile.match(command)[1]
+            # Asking server to send us a file
+            # if the file exist then server response with file size
+            size = send("download " + fileName)
+            if size != "err":
+                print("Start downloading..")
+                result = download(fileName, size)
+                print("Download is finished!")
+            else:
+                # cannot find the file on the server
+                print("No such file found on the server!")
+        elif uploadFile.match(command):
+            fileName = uploadFile.match(command)[1]
+            fileSize = getSize(fileName)
+            if fileSize:
+                if send("upload " + fileName + " " + str(fileSize)) == "ok":
+                    result = upload(fileName)
         else:
-            # cannot find the file on the server
-            print("No such file found on the server!")
-    elif uploadFile.match(command):
-        fileName = uploadFile.match(command)[1]
-        fileSize = getSize(fileName)
-        if fileSize:
-            if send("upload " + fileName + " " + str(fileSize)) == "ok":
-                result = upload(fileName)
-    else:
-        print("Please use one of the following command:")
-        print("upload <File Name>")
-        print("download <File Name>")
-        print("ls")
-        print("exit")
+            print("Please use one of the following command:")
+            print("upload <File Name>")
+            print("download <File Name>")
+            print("ls")
+            print("exit")
 
 print("Client connection Closed!")

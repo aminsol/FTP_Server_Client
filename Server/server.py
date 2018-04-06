@@ -12,6 +12,9 @@ ftp = 3333
 #serverPort = 2222
 # For communicating to Client
 clientPort = 1111
+
+# Check is command from client is: "python3 <serverFilename> <portNumber>"
+# Exit if not
 if len(sys.argv) == 2:
     serverFile = sys.argv[0]
     serverPort = int(sys.argv[1])

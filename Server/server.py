@@ -23,6 +23,7 @@ def getsize(filename):
 
 
 def download(filename, filesize):
+    filesize = int(filesize)
     # create TCP transfer socket on client to use for connecting to remote
     # server. Indicate the server's remote listening port
     clientSocket_transf = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -31,13 +32,12 @@ def download(filename, filesize):
     host = socket.gethostname()
 
     # open the TCP transfer connection
-    clientSocket_transf.connect((host, ftp))
-
-    # connection prompt
-    print("TCP transfer connected. | Server: %s, Port: %d" % (host, ftp))
-
+    clientSocket_transf.bind(('', ftp))
+    # Start listening for incoming connections
+    clientSocket_transf.listen(ftp)
+    connectionSocket,addr = clientSocket_transf.accept()
     # get the data back from the server
-    filedata = clientSocket_transf.recv(1024)
+    filedata = connectionSocket.recv(1024)
 
     # creat a file named "filename" and ready to write binary data to the file
     filehandler = open(filename, 'wb')
@@ -53,7 +53,7 @@ def download(filename, filesize):
 
     # loop to read in entire file
     while totalRecv < filesize:
-        filedata = clientSocket_transf.recv(1024)
+        filedata = connectionSocket.recv(1024)
         totalRecv = totalRecv + len(filedata)
         filehandler.write(filedata)
         print("Total Recieved: %d " % totalRecv)
@@ -65,13 +65,33 @@ def download(filename, filesize):
     return clientSocket_transf.close()
 
 
-def upload(filename):
-    return filename
+def upload(filename):  # pass communication socket hostname and file name
+    try:
+        fObj = open(filename, "rb")
+        fileSize = getsize(filename)
+        clientCtrSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        clientCtrSocket.connect((host, ftp))
+        print("FTP connection established commncing upload")
+        bytesSent = 0
+        while bytesSent < int(fileSize):
+            fileData = fObj.read()
+            if fileData:
+                bytesSent += clientCtrSocket.send(fileData)
+        print("File upload done...\n")
+        fObj.close()
+    except FileNotFoundError:
+        print("File not found...")
+        return "err"
+    except ConnectionError:
+        print("Error connecting to FTP port \n")
+        return "err"
 
 
-def ls():
-    return "<directories>"
-
+def ls(path):
+    if os.path.isdir(path):
+        return "\n".join(os.listdir(path))
+    else:
+        return False
 
 # Create a TCP socket
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

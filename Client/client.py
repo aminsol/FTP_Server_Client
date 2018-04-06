@@ -39,6 +39,7 @@ def getSize(filename):
 
 
 def download(filename, filesize):
+    filesize = int(filesize)
     # create TCP transfer socket on client to use for connecting to remote
     # server. Indicate the server's remote listening port
     clientSocket_transf = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -47,13 +48,12 @@ def download(filename, filesize):
     host = socket.gethostname()
 
     # open the TCP transfer connection
-    clientSocket_transf.connect((host, ftp))
-
-    # connection prompt
-    print("TCP transfer connected. | Server: %s, Port: %d" % (host, ftp))
-
+    clientSocket_transf.bind(('', ftp))
+    # Start listening for incoming connections
+    clientSocket_transf.listen(ftp)
+    connectionSocket,addr = clientSocket_transf.accept()
     # get the data back from the server
-    filedata = clientSocket_transf.recv(1024)
+    filedata = connectionSocket.recv(1024)
 
     # creat a file named "filename" and ready to write binary data to the file
     filehandler = open(filename, 'wb')
@@ -69,7 +69,7 @@ def download(filename, filesize):
 
     # loop to read in entire file
     while totalRecv < filesize:
-        filedata = clientSocket_transf.recv(1024)
+        filedata = connectionSocket.recv(1024)
         totalRecv = totalRecv + len(filedata)
         filehandler.write(filedata)
         print("Total Recieved: %d " % totalRecv)
@@ -106,30 +106,36 @@ def upload(uInput):  # pass communication socket hostname and file name
 
 uploadFile = re.compile('upload ([\w\.]+)')
 downloadFile = re.compile('download ([\w\.]+)')
+command = ""
 
-
-command = input("Enter your command: ")
-result = ""
-if command == "ls":
-    result = send("ls")
-elif downloadFile.match(command):
-    fileName = downloadFile.match(command)[1]
-    # Asking server to send us a file
-    # if the file exist then server response with file size
-    size = send("download " + fileName)
-    if size != "err":
-        print("Start downloading..")
-        result = download(fileName, size)
-        print("Download is finished!")
+while command != "exit":
+    command = input("Enter your command: ")
+    result = ""
+    if command == "ls":
+        result = send("ls")
+    elif downloadFile.match(command):
+        fileName = downloadFile.match(command)[1]
+        # Asking server to send us a file
+        # if the file exist then server response with file size
+        size = send("download " + fileName)
+        if size != "err":
+            print("Start downloading..")
+            result = download(fileName, size)
+            print("Download is finished!")
+        else:
+            # cannot find the file on the server
+            print("No such file found on the server!")
+    elif uploadFile.match(command):
+        fileName = uploadFile.match(command)[1]
+        fileSize = getSize(fileName)
+        if fileSize:
+            if send("upload " + fileName + " " + str(fileSize)) == "ok":
+                result = upload(fileName)
     else:
-        # cannot find the file on the server
-        print("No such file found on the server!")
-elif uploadFile.match(command):
-    fileName = uploadFile.match(command)[1]
-    fileSize = getSize(fileName)
-    if fileSize:
-        if send("upload " + fileName + " " + str(fileSize)) == "ok":
-            result = upload(fileName)
+        print("Please use one of the following command:")
+        print("upload <File Name>")
+        print("download <File Name>")
+        print("ls")
+        print("exit")
 
-print(result)
 print("Client connection Closed!")

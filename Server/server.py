@@ -9,10 +9,16 @@ import re
 # For file transfer
 ftp = 3333
 # For communicating to server
-serverPort = 2222
+#serverPort = 2222
 # For communicating to Client
 clientPort = 1111
-
+if len(sys.argv) == 2:
+    serverFile = sys.argv[0]
+    serverPort = int(sys.argv[1])
+    
+    print("Server Port: %d" % serverPort )
+else:
+    sys.exit()
 
 def getsize(filename):
     if os.path.isfile(filename):

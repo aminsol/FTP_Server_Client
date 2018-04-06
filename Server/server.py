@@ -1,84 +1,140 @@
-""" 
-    server.py
-    
-    CPSC 471 Group
-    
-    This server program does the following:
-        1. Creates a TCP socket and listens to connection request on port 2222;
-        2. Accepts request from client and receives the client's desired filename;
-        3. Searches the file under current server directory. If found sends "yes" back to the client otherwise sends "no"
-        4. Closes the TCP connection.
-    
-"""
+#!/usr/bin/python3
+# This is server.py file
+import socket
+import os
+import re
 
-from socket import *
+# The ports on which to listen
 
-server = 2222
+# For file transfer
 ftp = 3333
+# For communicating to server
+serverPort = 2222
+# For communicating to Client
+clientPort = 1111
 
-# Creates TCP welcoming and file transfer socket
-serverSocket = socket(AF_INET,SOCK_STREAM)
-fileSocket = socket(AF_INET,SOCK_STREAM)
-try:
-    serverSocket.bind(("",server))
-except:
-    print ("!!** server: Error: Port 2222 is not available, quitting...")
-    exit(0)
 
-try:
-    fileSocket.bind(("",ftp))
-except:
-    print ("!!** server: Error: Port 3333 is not available, quitting...")
-    exit(0)
+def getsize(filename):
+    if os.path.isfile(filename):
+        size = os.stat(filename).st_size
+    else:
+        size = False
+    return size
 
-# Server begins listening for incoming TCP requests
-serverSocket.listen(1)
-print ("The Server is listening on port %d ..." % server)
-fileSocket.listen(1)
-print ("The FTP Server is listening on port %d ... \n" % ftp)
 
-while 1:
-    # Waits for incoming requests; new socket created on return
-    connectionSocket, addr = serverSocket.accept()
-    print ("Connection established for client (IP, port) = %s" % str(addr))
+def download(filename, filesize):
+    filesize = int(filesize)
+    # create TCP transfer socket on client to use for connecting to remote
+    # server. Indicate the server's remote listening port
+    clientSocket_transf = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
-    # Reads the filename from socket sent by the client.
-    file_name = connectionSocket.recv(255)
-    file_name = file_name.decode("utf-8").strip()
+    # get local machine name
+    host = socket.gethostname()
     
-    # Opens the desired file.
-    # If success to open, send "yes" to the client, and closes the TCP control connection;
-    #     otherwise, send "no" to the client, closes the TCP control connection, and continue to the next loop
+    # open the TCP transfer connection
+    clientSocket_transf.bind(('', ftp))
+    # Start listening for incoming connections
+    clientSocket_transf.listen(ftp)
+    connectionSocket,addr = clientSocket_transf.accept()
+    # get the data back from the server
+    filedata = connectionSocket.recv(1024)
+    
+    # creat a file named "filename" and ready to write binary data to the file
+    filehandler = open(filename, 'wb')
+    
+    # store amount of data being recieved
+    totalRecv = len(filedata)
+    
+    # write the data to the file
+    filehandler.write(filedata)
+    
+    print("file size: %d " % filesize)
+    print("Total Recieved: %d " % totalRecv)
+    
+    # loop to read in entire file
+    while totalRecv < filesize:
+        filedata = connectionSocket.recv(1024)
+        totalRecv = totalRecv + len(filedata)
+        filehandler.write(filedata)
+        print("Total Recieved: %d " % totalRecv)
+
+    # close the file
+    filehandler.close()
+    
+    # close the TCP transfer connection
+    return clientSocket_transf.close()
+
+
+def upload(filename):  # pass communication socket hostname and file name
     try:
-        file_handler = open(file_name, 'rb')
-    except:
-        connectionSocket.send(b"no")
-        print ("***** Server log: file %s is not found, sent no to the client.\n" % file_name)
-        connectionSocket.close()
-        print("Connection to (IP, addr) = %s closed." % str(addr))
-        continue
-    connectionSocket.send(b"yes")
-    connectionSocket.close()
-    print("Connection to (IP, addr) = %s closed." % str(addr))
+        fObj = open(filename, "rb")
+        fileSize = getsize(filename)
+        clientCtrSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        clientCtrSocket.connect((host, ftp))
+        print("FTP connection established commncing upload")
+        bytesSent = 0
+        while bytesSent < int(fileSize):
+            fileData = fObj.read()
+            if fileData:
+                bytesSent += clientCtrSocket.send(fileData)
+        print("File upload done...\n")
+        fObj.close()
+    except FileNotFoundError:
+        print("File not found...")
+        return "err"
+    except ConnectionError:
+        print("Error connecting to FTP port \n")
+        return "err"
 
-    # accepts the new file transfer connection
-    transferSocket, addr = fileSocket.accept()
-    print ("File Transfer connection established for client (IP, port) = %s" % str(addr))
-    
-    # Reads the content of the file
-    file_content = file_handler.read()
-    
-    # Tries to send the file to the client using the TCP file transfer connection.
-    #   On success, prints the success informtion on the screen;
-    #       otherwise, prints the FAILURE information on the screen.
-    try:
-        transferSocket.send(file_content)
-        file_handler.close()
-        print ("file \"%s\" sent successfully!" % file_name)
-    except:
-        print ("***** Server log: file \"%s\" sent FAILED!!!" % file_name)
 
-    # Closes the TCP file transfer connection.
-    transferSocket.close()
-    print("Connection to (IP, addr) = %s closed.\n" % str(addr))
+def ls(path):
+    if os.path.isdir(path):
+        return "\n".join(os.listdir(path))
+    else:
+        return "Not such directory exist!"
 
+# Create a TCP socket
+serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+responseSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Bind the socket to the port
+serverSocket.bind(('',serverPort))
+host = socket.gethostname()
+
+
+# Start listening for incoming connections
+serverSocket.listen(serverPort)
+
+print("The server is ready to receive")
+uploadfile = re.compile('upload ([\w\.]+) (\d+)')
+downloadfile = re.compile('download ([\w\.]+)')
+lscommand = re.compile('^ls ([\w\.\\\/]*)$|^ls$')
+# The buffer to storetherreceived data
+data = ""
+response = ""
+# Forever accept incoming connections
+while True:
+    # Accept a connection; get client’s socket
+    connectionSocket,addr = serverSocket.accept()
+    # Receive whatever the newly connected client has to send
+    data = connectionSocket.recv(128).decode('ascii')
+    if lscommand.match(data):
+        if lscommand.match(data)[1]:
+            result = ls(lscommand.match(data)[1]).encode('ascii')
+            connectionSocket.send(ls(lscommand.match(data)[1]).encode('ascii'))
+        else:
+            connectionSocket.send(ls(".").encode('ascii'))
+    elif downloadfile.match(data):
+        fileName = downloadfile.match(data)[1]
+        fileSize = str(getsize(fileName))
+        connectionSocket.send(fileSize.encode('ascii'))
+        upload(fileName)
+    elif uploadfile.match(data):
+        fileName = uploadfile.match(data)[1]
+        fileSize = int(uploadfile.match(data)[2])
+        connectionSocket.send("ok".encode('ascii'))
+        download(fileName, fileSize)
+    else:
+        connectionSocket.send("err".encode('ascii'))
+        print("err")
+# Close the socket
+connectionSocket.close()

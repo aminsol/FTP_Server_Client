@@ -106,7 +106,7 @@ def upload(uInput):  # pass communication socket hostname and file name
 
 uploadFile = re.compile('upload ([\w\.]+)')
 downloadFile = re.compile('download ([\w\.]+)')
-lscommand = re.compile('ls ?([\w\.\\\/]*)')
+lscommand = re.compile('^ls ([\w\.\\\/]*)$|^ls$')
 command = ""
 
 while command != "exit":

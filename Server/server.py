@@ -107,7 +107,7 @@ serverSocket.listen(serverPort)
 print("The server is ready to receive")
 uploadfile = re.compile('upload ([\w\.]+) (\d+)')
 downloadfile = re.compile('download ([\w\.]+)')
-lscommand = re.compile('ls ?([\w\.\\\/]*)')
+lscommand = re.compile('^ls ([\w\.\\\/]*)$|^ls$')
 # The buffer to storetherreceived data
 data = ""
 response = ""

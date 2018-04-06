@@ -1,7 +1,7 @@
 # FTP Server Client
 FTP server and FTP client. The client shall connect to the server and support uploading and downloading of files to/from server.
 # Language
- * Python 3.4
+ * Python 3.6
 # Functions
 * __upload ( `<filename>` )__ _client and server_
     * Returns `ok` for success
@@ -24,8 +24,7 @@ FTP server and FTP client. The client shall connect to the server and support up
 # Protocol Design
 
 ## Ports
-    
-* Client Port: 1111
+
 * Server Port: 2222
 * File Transfer Port: 3333
 

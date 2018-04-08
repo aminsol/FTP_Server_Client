@@ -126,9 +126,11 @@ while command[0] != "exit":
         # Asking server to send us a file
         # if the file exist then server response with file size
         size = send("download " + fileName)
+        
         if size != "err":
             print("Start downloading..")
             result = download(fileName, size)
+            print(result)
             print("Download is finished!")
         else:
             # cannot find the file on the server
@@ -139,6 +141,8 @@ while command[0] != "exit":
         if fileSize:
             if send("upload " + fileName + " " + str(fileSize)) == "ok":
                 result = upload(fileName)
+        else:
+            print("No such file found locally...")
 
     elif command[0] !="exit":
         print("Please use one of the following command:")

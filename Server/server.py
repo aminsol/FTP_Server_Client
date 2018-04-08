@@ -71,6 +71,7 @@ def download(filename, filesize):
 
     # close the file
     filehandler.close()
+    print("Upload from client complete...")
 
     # close the TCP transfer connection
     return clientSocket_transf.close()
@@ -88,7 +89,7 @@ def upload(filename):  # pass communication socket hostname and file name
             fileData = fObj.read()
             if fileData:
                 bytesSent += clientCtrSocket.send(fileData)
-        print("File " + filename " upload done...\n")
+        print("File " + filename + " upload done...\n")
         fObj.close()
     except FileNotFoundError:
         print("File not found...")
@@ -129,7 +130,7 @@ while True:
     print("Established Connection with: " + str(addr))
     # Receive whatever the newly connected client has to send
     data = connectionSocket.recv(128).decode('ascii').strip()
-    print(data)
+    
     if lscommand.match(data):
         print("MSG: Recived ls command")
         connectionSocket.send(ls(".").encode('ascii'))
@@ -138,8 +139,12 @@ while True:
         print("MSG: Recived download command")
         fileName = data[1]
         fileSize = str(getsize(fileName))
-        connectionSocket.send(fileSize.encode('ascii'))
-        upload(fileName)
+        if fileSize == "False":
+           print("File requested not found sending err msg...")
+           connectionSocket.send("err".encode('ascii'))
+        else:
+            connectionSocket.send(fileSize.encode('ascii'))
+            upload(fileName)
     elif uploadfile.match(data):
         data = data.split(" ")
         print("MSG: Recived upload command")

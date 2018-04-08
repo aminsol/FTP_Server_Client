@@ -2,6 +2,7 @@
 # This is server.py file
 import socket
 import os
+import sys
 import re
 
 # The ports on which to listen
@@ -21,6 +22,7 @@ if len(sys.argv) == 2:
     
     print("Server Port: %d" % serverPort )
 else:
+    print("Invalid argument(s): usage 'python3 server.py <port number>'")
     sys.exit()
 
 def getsize(filename):
@@ -86,7 +88,7 @@ def upload(filename):  # pass communication socket hostname and file name
             fileData = fObj.read()
             if fileData:
                 bytesSent += clientCtrSocket.send(fileData)
-        print("File upload done...\n")
+        print("File " + filename " upload done...\n")
         fObj.close()
     except FileNotFoundError:
         print("File not found...")
@@ -124,22 +126,25 @@ response = ""
 while True:
     # Accept a connection; get client’s socket
     connectionSocket,addr = serverSocket.accept()
+    print("Established Connection with: " + str(addr))
     # Receive whatever the newly connected client has to send
-    data = connectionSocket.recv(128).decode('ascii')
+    data = connectionSocket.recv(128).decode('ascii').strip()
+    print(data)
     if lscommand.match(data):
-        if lscommand.match(data)[1]:
-            result = ls(lscommand.match(data)[1]).encode('ascii')
-            connectionSocket.send(ls(lscommand.match(data)[1]).encode('ascii'))
-        else:
-            connectionSocket.send(ls(".").encode('ascii'))
+        print("MSG: Recived ls command")
+        connectionSocket.send(ls(".").encode('ascii'))
     elif downloadfile.match(data):
-        fileName = downloadfile.match(data)[1]
+        data = data.split(" ")
+        print("MSG: Recived download command")
+        fileName = data[1]
         fileSize = str(getsize(fileName))
         connectionSocket.send(fileSize.encode('ascii'))
         upload(fileName)
     elif uploadfile.match(data):
-        fileName = uploadfile.match(data)[1]
-        fileSize = int(uploadfile.match(data)[2])
+        data = data.split(" ")
+        print("MSG: Recived upload command")
+        fileName = data[1]
+        fileSize = int(data[2])
         connectionSocket.send("ok".encode('ascii'))
         download(fileName, fileSize)
     else:

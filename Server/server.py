@@ -2,6 +2,7 @@
 # This is server.py file
 import socket
 import os
+import sys
 import re
 
 # The ports on which to listen
@@ -9,9 +10,20 @@ import re
 # For file transfer
 ftp = 3333
 # For communicating to server
-serverPort = 2222
+# serverPort = 2222
 # For communicating to Client
 clientPort = 1111
+
+# Check is command from client is: "python3 <serverFilename> <portNumber>"
+# Exit if not
+if len(sys.argv) == 2:
+    serverFile = sys.argv[0]
+    serverPort = int(sys.argv[1])
+
+    print("Server Port: %d" % serverPort)
+else:
+    print("Invalid argument(s): usage 'python3 server.py <port number>'")
+    sys.exit()
 
 
 def getsize(filename):
@@ -35,7 +47,7 @@ def download(filename, filesize):
     clientSocket_transf.bind(('', ftp))
     # Start listening for incoming connections
     clientSocket_transf.listen(ftp)
-    connectionSocket,addr = clientSocket_transf.accept()
+    connectionSocket, addr = clientSocket_transf.accept()
     # get the data back from the server
     filedata = connectionSocket.recv(1024)
 
@@ -60,6 +72,7 @@ def download(filename, filesize):
 
     # close the file
     filehandler.close()
+    print("Upload from client complete...")
 
     # close the TCP transfer connection
     return clientSocket_transf.close()
@@ -77,7 +90,7 @@ def upload(filename):  # pass communication socket hostname and file name
             fileData = fObj.read()
             if fileData:
                 bytesSent += clientCtrSocket.send(fileData)
-        print("File upload done...\n")
+        print("File " + filename + " upload done...\n")
         fObj.close()
     except FileNotFoundError:
         print("File not found...")
@@ -93,13 +106,13 @@ def ls(path):
     else:
         return "Not such directory exist!"
 
+
 # Create a TCP socket
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 responseSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Bind the socket to the port
-serverSocket.bind(('',serverPort))
+serverSocket.bind(('', serverPort))
 host = socket.gethostname()
-
 
 # Start listening for incoming connections
 serverSocket.listen(serverPort)
@@ -114,23 +127,30 @@ response = ""
 # Forever accept incoming connections
 while True:
     # Accept a connection; get client’s socket
-    connectionSocket,addr = serverSocket.accept()
+    connectionSocket, addr = serverSocket.accept()
+    print("Established Connection with: " + str(addr))
     # Receive whatever the newly connected client has to send
-    data = connectionSocket.recv(128).decode('ascii')
+    data = connectionSocket.recv(128).decode('ascii').strip()
+
     if lscommand.match(data):
-        if lscommand.match(data)[1]:
-            result = ls(lscommand.match(data)[1]).encode('ascii')
-            connectionSocket.send(ls(lscommand.match(data)[1]).encode('ascii'))
-        else:
-            connectionSocket.send(ls(".").encode('ascii'))
+        print("MSG: Recived ls command")
+        connectionSocket.send(ls(".").encode('ascii'))
     elif downloadfile.match(data):
-        fileName = downloadfile.match(data)[1]
+        data = data.split(" ")
+        print("MSG: Recived download command")
+        fileName = data[1]
         fileSize = str(getsize(fileName))
-        connectionSocket.send(fileSize.encode('ascii'))
-        upload(fileName)
+        if fileSize == "False":
+            print("File requested not found sending err msg...")
+            connectionSocket.send("err".encode('ascii'))
+        else:
+            connectionSocket.send(fileSize.encode('ascii'))
+            upload(fileName)
     elif uploadfile.match(data):
-        fileName = uploadfile.match(data)[1]
-        fileSize = int(uploadfile.match(data)[2])
+        data = data.split(" ")
+        print("MSG: Recived upload command")
+        fileName = data[1]
+        fileSize = int(data[2])
         connectionSocket.send("ok".encode('ascii'))
         download(fileName, fileSize)
     else:

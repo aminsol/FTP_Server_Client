@@ -8,10 +8,17 @@ import re
 # For file transfer
 ftp = 3333
 # For communicating to server
-serverPort = 2222
+# serverPort = 2222
 # For communicating to Client
 clientPort = 1111
-host = socket.gethostname()
+# host = socket.gethostname()
+
+if len(sys.argv) == 3:
+    host = socket.gethostbyname(sys.argv[1].strip())
+    serverPort = int(sys.argv[2])
+else:
+    print("Invalid argument(s): usage 'python3 client.py <hostname> <port number>'")
+    sys.exit()
 
 
 def send(data):
@@ -51,7 +58,7 @@ def download(filename, filesize):
     clientSocket_transf.bind(('', ftp))
     # Start listening for incoming connections
     clientSocket_transf.listen(ftp)
-    connectionSocket,addr = clientSocket_transf.accept()
+    connectionSocket, addr = clientSocket_transf.accept()
     # get the data back from the server
     filedata = connectionSocket.recv(1024)
 
@@ -65,14 +72,14 @@ def download(filename, filesize):
     filehandler.write(filedata)
 
     print("file size: %d " % filesize)
-    print("Total Recieved: %d " % totalRecv)
+    print("Total Recieved: %d" % totalRecv)
 
     # loop to read in entire file
     while totalRecv < filesize:
         filedata = connectionSocket.recv(1024)
         totalRecv = totalRecv + len(filedata)
         filehandler.write(filedata)
-        print("Total Recieved: %d " % totalRecv)
+        print("Total Recieved: %d / %d" % (totalRecv, filesize))
 
     # close the file
     filehandler.close()
@@ -104,35 +111,40 @@ def upload(uInput):  # pass communication socket hostname and file name
         return "err"
 
 
-uploadFile = re.compile('upload ([\w\.]+)')
-downloadFile = re.compile('download ([\w\.]+)')
+uploadFile = re.compile('upload([\w\.]+)')
+downloadFile = re.compile('download([\w\.]+)')
 lscommand = re.compile('^ls ([\w\.\\\/]*)$|^ls$')
-command = ""
+command = "..."
 
-while command != "exit":
-    command = input("Enter your command: ")
+while command[0] != "exit":
+    command = input("Enter your command: ").split(" ")
     result = ""
-    if lscommand.match(command):
-        print(send(command))
-    elif downloadFile.match(command):
-        fileName = downloadFile.match(command)[1]
+    if lscommand.match(command[0]):
+        print(send(command[0]))
+    elif command[0] == "download":
+        fileName = command[1]
         # Asking server to send us a file
         # if the file exist then server response with file size
         size = send("download " + fileName)
+
         if size != "err":
             print("Start downloading..")
             result = download(fileName, size)
+            print(result)
             print("Download is finished!")
         else:
             # cannot find the file on the server
             print("No such file found on the server!")
-    elif uploadFile.match(command):
-        fileName = uploadFile.match(command)[1]
+    elif command[0] == "upload":
+        fileName = command[1]
         fileSize = getSize(fileName)
         if fileSize:
             if send("upload " + fileName + " " + str(fileSize)) == "ok":
                 result = upload(fileName)
-    else:
+        else:
+            print("No such file found locally...")
+
+    elif command[0] != "exit":
         print("Please use one of the following command:")
         print("upload <File Name>")
         print("download <File Name>")

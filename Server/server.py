@@ -156,5 +156,3 @@ while True:
     else:
         connectionSocket.send("err".encode('ascii'))
         print("err")
-# Close the socket
-connectionSocket.close()
